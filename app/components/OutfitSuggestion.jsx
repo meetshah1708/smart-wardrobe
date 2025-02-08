@@ -15,15 +15,19 @@ const OutfitSuggestion = () => {
   const [wardrobe, setWardrobe] = useState([]);
 
   const occasions = [
-    'casual', 'formal', 'business', 'party', 
+    'casual', 'formal', 'business', 'party',
     'workout', 'date', 'interview'
   ];
 
   // Fetch wardrobe items when component mounts
   useEffect(() => {
     const fetchWardrobe = async () => {
+      // In app/components/OutfitSuggestion.jsx
       try {
         const response = await fetch('/api/clothes');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
         const data = await response.json();
         if (data.clothes) {
           setWardrobe(data.clothes);
@@ -39,7 +43,7 @@ const OutfitSuggestion = () => {
   const handleGetSuggestions = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
       const response = await fetch('/api/suggestions', {
         method: 'POST',
@@ -58,13 +62,13 @@ const OutfitSuggestion = () => {
       }
 
       const data = await response.json();
-      
+
       // Map the AI suggestions to actual wardrobe items
       const mappedSuggestions = data.suggestions.map(suggestion => ({
         ...suggestion,
         items: suggestion.items.map(item => {
-          const wardrobeItem = wardrobe.find(w => 
-            w.category === item.category && 
+          const wardrobeItem = wardrobe.find(w =>
+            w.category === item.category &&
             w.color === item.color
           );
           return wardrobeItem || item;
@@ -96,7 +100,7 @@ const OutfitSuggestion = () => {
             />
           </label>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Occasion
@@ -146,17 +150,15 @@ const OutfitSuggestion = () => {
               {suggestion.items && suggestion.items.map((item, i) => (
                 <div key={i} className="flex items-center space-x-4 bg-gray-50 dark:bg-gray-600 p-3 rounded-lg">
                   <div className="relative w-24 h-24 flex-shrink-0">
-                    {item.image ? (
+                    {item.imageUrl ? (
                       <Image
-                        src={item.image}
+                        src={item.imageUrl}
                         alt={`${item.category} - ${item.color}`}
                         fill
                         className="rounded-md object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-200 dark:bg-gray-500 rounded-md flex items-center justify-center">
-                        <span className="text-gray-400 text-sm">No image</span>
-                      </div>
+                      <div>No image</div>
                     )}
                   </div>
                   <div className="flex-1">
